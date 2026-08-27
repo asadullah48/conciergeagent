@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ConciergeAgent | Hyperpersonalized Service AI Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <!-- Ambient Gold/Emerald FX -->
+  <div class="glow-sphere glow-gold"></div>
+  <div class="glow-sphere glow-emerald"></div>
+
+  <!-- Top Navigation Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
+        </div>
+        <div class="brand-info">
+          <h1>Concierge<span class="gradient-text">Agent</span></h1>
+          <span class="brand-badge" data-i18n="badgeTitle">Five-Star Hospitality AI</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <a href="https://asadullahshafique-devunity.vercel.app" target="_blank" class="btn btn-secondary btn-sm" style="text-decoration:none;">
+          <span>👨‍💻 DevUnity Portfolio</span>
+        </a>
+
+        <div class="live-status">
+          <span class="pulse-dot"></span>
+          <span id="gatewayStatus" data-i18n="statusLive">Concierge Active (:8005)</span>
+        </div>
+
+        <button id="langToggleBtn" class="btn btn-outline btn-sm" onclick="toggleLanguage()">
+          <span id="langLabel">العربية</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Body -->
+  <main class="app-main">
+    <!-- Hero Header -->
+    <section class="hero-section">
+      <h2 data-i18n="heroTitle">White-Glove Hyperpersonalization & Bespoke AI Advisory</h2>
+      <p data-i18n="heroSubtitle">Empowering banking, private wealth, insurance, and luxury retail with tier-adapted financial advisory, instant dispute resolution, and five-star customer experience governance.</p>
+    </section>
+
+    <!-- Metrics Row -->
+    <section class="metrics-grid">
+      <div class="metric-card glass">
+        <span class="metric-label" data-i18n="metric1Label">Predicted CSAT</span>
+        <div class="metric-value gradient-text">4.98 / 5.0</div>
+        <span class="metric-sub" data-i18n="metric1Sub">Hospitality & Empathy Score</span>
+      </div>
+      <div class="metric-card glass">
+        <span class="metric-label" data-i18n="metric2Label">Ultra-VIP SLA</span>
+        <div class="metric-value">30 Seconds</div>
+        <span class="metric-sub" data-i18n="metric2Sub">Dedicated Family Office Lead</span>
+      </div>
+      <div class="metric-card glass">
+        <span class="metric-label" data-i18n="metric3Label">Instant Auto-Credit</span>
+        <div class="metric-value">$50,000</div>
+        <span class="metric-sub" data-i18n="metric3Sub">Zero-Liability VIP Protection</span>
+      </div>
+      <div class="metric-card glass">
+        <span class="metric-label" data-i18n="metric4Label">Private Yield Alpha</span>
+        <div class="metric-value">+8.2% APY</div>
+        <span class="metric-sub" data-i18n="metric4Sub">Tax-Loss Harvested Portfolios</span>
+      </div>
+    </section>
+
+    <!-- Concierge Studio -->
+    <section class="studio-section">
+      <div class="section-header">
+        <div>
+          <h3 data-i18n="studioTitle">Hyperpersonalized Concierge Studio</h3>
+          <p class="section-desc" data-i18n="studioDesc">Switch wealth tiers, select bespoke scenarios, and watch real-time empathetic tone modulation, advisory allocation, and VIP privilege gifting.</p>
+        </div>
+      </div>
+
+      <div class="studio-layout">
+        <!-- Control Panel -->
+        <div class="panel glass">
+          <!-- Wealth Tier Selector -->
+          <div class="form-group">
+            <label data-i18n="lblWealthTier">Customer Wealth Tier</label>
+            <div class="tier-selector">
+              <button class="tier-btn active" onclick="selectTier('ULTRA_HNW')">💎 Ultra-HNW</button>
+              <button class="tier-btn" onclick="selectTier('PRIVATE_CLIENT')">🏛️ Private Client</button>
+              <button class="tier-btn" onclick="selectTier('PREMIER')">🌟 Premier</button>
+              <button class="tier-btn" onclick="selectTier('RETAIL')">👤 Retail</button>
+            </div>
+          </div>
+
+          <!-- Customer Persona Card -->
+          <div id="personaCard" class="persona-card">
+            <div class="persona-header">
+              <div>
+                <strong id="personaName">Lord Sterling</strong>
+                <span id="personaTierBadge" class="badge badge-gold">ULTRA_HNW ($15M AUM)</span>
+              </div>
+              <span id="personaLtv" class="ltv-score">LTV: 98.5</span>
+            </div>
+            <div class="persona-details">
+              <span><strong>Dedicated Officer:</strong> <span id="personaOfficer">Executive Family Office Lead</span></span>
+              <span><strong>SLA Guarantee:</strong> <span id="personaSla">30 Seconds</span></span>
+              <span><strong>Dispute Auto-Credit:</strong> <span id="personaCredit">$50,000.00</span></span>
+            </div>
+          </div>
+
+          <!-- Preset Scenarios -->
+          <div class="preset-box">
+            <span class="preset-label" data-i18n="lblPresets">Bespoke Touchpoint Scenarios:</span>
+            <div class="preset-buttons" id="scenarioButtons">
+              <!-- JS Rendered -->
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label data-i18n="lblQuery">Customer Query / Request</label>
+            <textarea id="queryInput" class="input-control" rows="3"></textarea>
+          </div>
+
+          <button class="btn btn-primary btn-block" onclick="runConcierge()" id="conciergeBtn">
+            <span data-i18n="btnEngage">🛎️ Engage Concierge Service</span>
+          </button>
+        </div>
+
+        <!-- Output Experience Panel -->
+        <div class="panel glass output-panel">
+          <div class="panel-header">
+            <span class="panel-title" data-i18n="titleConciergeOutput">Concierge Response & Five-Star Review</span>
+            <span id="sentimentBadge" class="badge badge-success">⭐ 5.0 Stars (DELIGHTED)</span>
+          </div>
+
+          <!-- Response Body -->
+          <div class="concierge-dialog-box">
+            <div id="conciergeResponseText" class="dialog-text">Select a scenario or type a query to experience hyperpersonalized concierge service...</div>
+          </div>
+
+          <!-- VIP Privilege Unlocked Card -->
+          <div id="vipPerkCard" class="vip-perk-card" style="display:none;">
+            <div class="perk-icon">🎁</div>
+            <div class="perk-content">
+              <strong>VIP Concierge Privilege Unlocked</strong>
+              <p id="perkText">Exclusive 5,000 Loyalty Reward Points</p>
+            </div>
+          </div>
+
+          <!-- Advisory Allocation (if applicable) -->
+          <div id="allocationCard" class="allocation-box" style="display:none;">
+            <strong data-i18n="lblAllocationTitle">Bespoke Asset Allocation Model:</strong>
+            <div id="allocationGrid" class="allocation-grid"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <p style="margin-bottom:6px;"><a href="https://asadullahshafique-devunity.vercel.app" target="_blank" style="color:var(--accent-gold); text-decoration:none; font-weight:600;">← Back to Asadullah Shafique Portfolio (DevUnity)</a></p>
+    <p>© 2026 ConciergeAgent • Hyperpersonalized Service AI Platform • <a href="https://github.com/asadullah48/conciergeagent" target="_blank">GitHub Repository</a></p>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
