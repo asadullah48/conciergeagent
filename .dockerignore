@@ -1,0 +1,30 @@
+# VCS & CI
+.git
+.github
+.gitignore
+
+# Python bytecode & build artifacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.eggs/
+
+# Test & coverage artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+.ruff_cache/
+
+# Local environments
+.venv/
+venv/
+env/
+.env
+
+# Docs & infra not needed at runtime
+docs/
+helm/
+*.md
+!README.md

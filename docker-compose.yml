@@ -1,17 +1,23 @@
-version: '3.8'
-
 services:
   conciergeagent-gateway:
     build: .
+    image: conciergeagent:local
     container_name: conciergeagent-gateway
     ports:
       - "8005:8005"
     environment:
-      - ENVIRONMENT=production
-      - LOG_LEVEL=info
+      ENVIRONMENT: production
+      LOG_LEVEL: INFO
+      JSON_LOGS: "true"
+      METRICS_ENABLED: "true"
+      ALLOWED_ORIGINS: "http://localhost:8005,http://127.0.0.1:8005"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8005/healthz"]
+      test: ["CMD", "curl", "-fsS", "http://localhost:8005/healthz"]
       interval: 15s
       timeout: 5s
       retries: 3
-    restart: always
+      start_period: 10s
+    restart: unless-stopped
+    read_only: true
+    security_opt:
+      - no-new-privileges:true

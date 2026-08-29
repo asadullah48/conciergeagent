@@ -1,43 +1,78 @@
-from typing import Optional
+"""ExperienceAgent: hospitality auditing, tone modulation, and entitlement."""
+from __future__ import annotations
+
+from conciergeagent.core.loyalty_policy import determine_perk
 from conciergeagent.core.models import (
-    CustomerProfile, WealthTier, SentimentGrade, ExperienceReview
+    CustomerProfile,
+    ExperienceReview,
+    SentimentGrade,
 )
 from conciergeagent.core.personalization_engine import PersonalizationEngine
 
+# Hospitality rating delivered per sentiment grade (1-5 stars).
+_HOSPITALITY_RATING: dict[SentimentGrade, int] = {
+    SentimentGrade.DELIGHTED: 5,
+    SentimentGrade.POSITIVE: 5,
+    SentimentGrade.NEUTRAL: 5,
+    SentimentGrade.FRUSTRATED: 3,
+    SentimentGrade.CRITICAL_DISTRESS: 1,
+}
+
+# Per SPEC.md section 4, only critical distress triggers a human handover.
+# Frustration is remediated in-channel with an apology and a recovery credit.
+_ESCALATION_GRADES = frozenset({SentimentGrade.CRITICAL_DISTRESS})
+
+
 class ExperienceAgent:
+    """Audits interaction hospitality, crafts empathetic phrasing, awards
+    entitlements, and triggers executive handover when a case warrants it.
     """
-    ExperienceAgent: Audits interaction hospitality, crafts empathetic phrasing,
-    awards VIP loyalty perks, and triggers executive human handover when needed.
-    """
-    def __init__(self):
+
+    def __init__(self) -> None:
         self.name = "ExperienceAgent"
-        self.version = "1.0.0"
+        self.version = "2.0.0"
 
-    def audit_experience(self, profile: CustomerProfile, query: str, raw_sentiment: float) -> ExperienceReview:
-        grade, score = PersonalizationEngine.classify_sentiment(query, raw_sentiment)
-        
-        # Opening greeting
-        if grade in [SentimentGrade.CRITICAL_DISTRESS, SentimentGrade.FRUSTRATED]:
-            opening = f"Dear {profile.name}, please accept our immediate and sincere apologies for any distress this has caused. We are taking personal ownership of your case right now."
-            rating = 3 if grade == SentimentGrade.FRUSTRATED else 1
-            escalate = True
-            perk = "Priority Service Credit ($250) + Complimentary Luxury Lounge Pass"
-        else:
-            opening = f"A very warm welcome, {profile.name}. It is our absolute pleasure to assist our valued {profile.wealth_tier.value.replace('_', ' ')} client today."
-            rating = 5
-            escalate = False
-            if profile.wealth_tier in [WealthTier.ULTRA_HNW, WealthTier.PRIVATE_CLIENT]:
-                perk = "Exclusive 5,000 Bonus Loyalty Points + Private Jet & Dining Concierge Access"
-            else:
-                perk = "Complimentary 1,000 Loyalty Reward Points"
+    @staticmethod
+    def _compose_opening(profile: CustomerProfile, grade: SentimentGrade) -> str:
+        tier_label = profile.wealth_tier.value.replace("_", " ").title()
+        if grade is SentimentGrade.CRITICAL_DISTRESS:
+            return (
+                f"Dear {profile.name}, please accept our immediate and sincere apologies. "
+                "A senior member of our team is taking personal ownership of your case right now."
+            )
+        if grade is SentimentGrade.FRUSTRATED:
+            return (
+                f"Dear {profile.name}, I am sorry this has fallen short of the standard you "
+                "expect from us. Let me put it right straight away."
+            )
+        if grade is SentimentGrade.DELIGHTED:
+            return (
+                f"{profile.name}, thank you — it is a genuine privilege to look after you, "
+                f"and our {tier_label} desk is delighted to hear this."
+            )
+        return (
+            f"A very warm welcome, {profile.name}. It is our absolute pleasure to assist our "
+            f"valued {tier_label} client today."
+        )
 
-        closing = f"At your service 24/7/365. Your dedicated concierge team remains on standby."
+    def audit_experience(
+        self, profile: CustomerProfile, query: str, raw_sentiment: float
+    ) -> ExperienceReview:
+        grade, _score = PersonalizationEngine.classify_sentiment(query, raw_sentiment)
+        award = determine_perk(profile.wealth_tier, grade)
+        escalate = grade in _ESCALATION_GRADES
+
+        closing = (
+            "Your dedicated concierge team remains on standby, 24/7/365."
+            if not escalate
+            else "Your executive handover ticket is open and you will hear from us within your SLA."
+        )
 
         return ExperienceReview(
             sentiment_grade=grade,
-            hospitality_rating=rating,
-            empathetic_opening=opening,
-            loyalty_perk_awarded=perk,
+            hospitality_rating=_HOSPITALITY_RATING[grade],
+            empathetic_opening=self._compose_opening(profile, grade),
+            loyalty_perk_awarded=award.description if award else None,
             executive_escalation_required=escalate,
-            closing_courtesy=closing
+            closing_courtesy=closing,
         )

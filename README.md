@@ -2,10 +2,11 @@
 
 > **A luxury, white-glove customer concierge multi-agent framework delivering personalized wealth advisory, instant claims and dispute resolution, and five-star hospitality governance.**
 
-[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-green.svg)](https://www.python.org/)
-[![Tests Passing](https://img.shields.io/badge/Tests-90%2B%20Passing-brightgreen.svg)]()
-[![FastAPI](https://img.shields.io/badge/API-FastAPI%20%3A8005-teal.svg)](http://127.0.0.1:8005/docs)
+[![CI](https://github.com/asadullah48/conciergeagent/actions/workflows/ci.yml/badge.svg)](https://github.com/asadullah48/conciergeagent/actions/workflows/ci.yml)
+[![Tests](https://img.shields.io/badge/tests-382%20passing-brightgreen.svg)](https://github.com/asadullah48/conciergeagent/actions/workflows/ci.yml)
+[![Coverage](https://img.shields.io/badge/coverage-99%25-brightgreen.svg)](https://github.com/asadullah48/conciergeagent/actions/workflows/ci.yml)
+[![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://www.python.org/)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Author](https://img.shields.io/badge/Author-Asadullah%20Shafique-purple.svg)](https://asadullahshafique-devunity.vercel.app)
 
 ---

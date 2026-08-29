@@ -3,11 +3,38 @@ replicaCount: 2
 image:
   repository: ghcr.io/asadullah48/conciergeagent
   pullPolicy: IfNotPresent
-  tag: "1.0.0"
+  tag: "1.1.0"
 
 service:
   type: ClusterIP
   port: 8005
+
+env:
+  environment: production
+  logLevel: INFO
+  jsonLogs: true
+  # Explicit allowlist. The gateway sends credentials, so a wildcard origin
+  # would let any site call the API on behalf of a signed-in user.
+  allowedOrigins:
+    - https://asadullahshafique-devunity.vercel.app
+
+metrics:
+  enabled: true
+  scrape: true
+  path: /metrics
+
+# The image runs as uid 10001 and needs no write access to its root filesystem.
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 10001
+  fsGroup: 10001
+
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
 
 resources:
   limits:
