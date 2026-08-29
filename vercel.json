@@ -1,0 +1,17 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/api/index" }
+  ],
+  "functions": {
+    "api/index.py": {
+      "memory": 512,
+      "maxDuration": 15
+    }
+  },
+  "env": {
+    "ENVIRONMENT": "production",
+    "LOG_LEVEL": "INFO",
+    "JSON_LOGS": "true"
+  }
+}

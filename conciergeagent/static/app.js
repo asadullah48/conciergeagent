@@ -191,6 +191,64 @@ function loadScenario(idx) {
   document.getElementById('queryInput').value = sc.query;
 }
 
+/**
+ * Decide which agent lane a customer query belongs to.
+ *
+ * The gateway treats this value as authoritative -- it no longer second-guesses
+ * the caller by sniffing the query text -- so whatever this returns is the lane
+ * that runs. LOYALTY was previously unreachable from the dashboard.
+ *
+ * @param {string} query Raw customer text from the textarea.
+ * @returns {"ADVISORY"|"SUPPORT"|"LOYALTY"} The lane to route to.
+ */
+function classifyIntent(query) {
+  const text = query.toLowerCase();
+  if (SUPPORT_CUES.some((cue) => text.includes(cue))) return 'SUPPORT';
+  if (LOYALTY_CUES.some((cue) => text.includes(cue))) return 'LOYALTY';
+  return 'ADVISORY';
+}
+
+const SUPPORT_CUES = ['dispute', 'claim', 'charge', 'fraud', 'unauthorized', 'damage'];
+const LOYALTY_CUES = ['reward', 'loyalty', 'points', 'perk', 'benefit', 'tier'];
+
+// Escape first, format second. The concierge reply embeds the customer name and
+// query, so formatting raw text would let a crafted query inject markup. By the
+// time any tag characters reach the formatter they are already entities, and the
+// only HTML in the output is what this function itself emits.
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
+// The gateway speaks a deliberately tiny Markdown subset: **bold** and blank
+// lines. Rendering it beats shipping a Markdown library for two constructs.
+function renderConciergeMarkdown(text) {
+  if (!text) return '';
+  return escapeHtml(text)
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n{2,}/g, '</p><p>')
+    .replace(/\n/g, '<br>')
+    .replace(/^/, '<p>')
+    .concat('</p>');
+}
+
+// Turn a FastAPI validation payload into a sentence a person can act on.
+function describeApiError(status, payload) {
+  const detail = payload && payload.detail;
+  if (Array.isArray(detail) && detail.length) {
+    const problems = detail
+      .map((item) => `${(item.loc || []).slice(-1)[0]}: ${item.msg}`)
+      .join('; ');
+    return `**Request rejected (${status}).** ${problems}`;
+  }
+  if (typeof detail === 'string') return `**Request rejected (${status}).** ${detail}`;
+  return `**Request rejected (${status}).** Please adjust the query and try again.`;
+}
+
 async function runConcierge() {
   const btn = document.getElementById('conciergeBtn');
   const query = document.getElementById('queryInput').value.trim();
@@ -207,16 +265,27 @@ async function runConcierge() {
         interaction_id: `INT-${Date.now()}`,
         customer_profile: profile,
         user_query: query,
-        intent_category: query.toLowerCase().includes('dispute') || query.toLowerCase().includes('claim') ? 'SUPPORT' : 'ADVISORY',
+        intent_category: classifyIntent(query),
         raw_sentiment_score: query.toLowerCase().includes('dispute') ? -0.4 : 0.85
       })
     });
 
     const data = await res.json();
 
+    // The gateway validates input and answers 4xx with {detail: [...]}. Without
+    // this guard a rejected request rendered the string "undefined".
+    if (!res.ok) {
+      document.getElementById('conciergeResponseText').innerHTML =
+        renderConciergeMarkdown(describeApiError(res.status, data));
+      document.getElementById('vipPerkCard').style.display = 'none';
+      document.getElementById('allocationCard').style.display = 'none';
+      return;
+    }
+
     // Render dialog
-    document.getElementById('conciergeResponseText').innerText = data.concierge_response_text;
-    
+    document.getElementById('conciergeResponseText').innerHTML =
+      renderConciergeMarkdown(data.concierge_response_text);
+
     // Render badge
     const badge = document.getElementById('sentimentBadge');
     badge.innerText = `⭐ ${data.experience_review.hospitality_rating}.0 Stars (${data.experience_review.sentiment_grade})`;

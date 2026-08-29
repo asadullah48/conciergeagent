@@ -119,10 +119,34 @@ def test_audit_never_raises_across_the_matrix(agent, profile_factory, tier, grad
     assert review.empathetic_opening and review.closing_courtesy
 
 
-def test_tier_label_is_humanised_in_the_greeting(agent, profile_factory):
-    review = agent.audit_experience(profile_factory(WealthTier.PRIVATE_CLIENT), NEUTRAL_QUERY, 0.0)
-    assert "Private Client" in review.empathetic_opening
-    assert "PRIVATE_CLIENT" not in review.empathetic_opening
+@pytest.mark.parametrize(
+    "tier,officer",
+    [
+        (WealthTier.ULTRA_HNW, "Executive Family Office Lead"),
+        (WealthTier.PRIVATE_CLIENT, "Senior Private Banker"),
+        (WealthTier.PREMIER, "Premier Relationship Manager"),
+        (WealthTier.RETAIL, "Digital Concierge Assistant"),
+    ],
+)
+def test_neutral_greeting_names_the_dedicated_officer(agent, profile_factory, tier, officer):
+    """Naming the officer avoids the awkward "valued Private Client client"."""
+    review = agent.audit_experience(profile_factory(tier), NEUTRAL_QUERY, 0.0)
+    assert officer in review.empathetic_opening
+
+
+@pytest.mark.parametrize("tier", list(WealthTier))
+@pytest.mark.parametrize("grade", list(SentimentGrade))
+def test_raw_enum_values_never_reach_customer_copy(agent, profile_factory, tier, grade):
+    review = agent.audit_experience(profile_factory(tier), QUERY_FOR_GRADE[grade], 0.0)
+    customer_facing = " ".join(
+        [review.empathetic_opening, review.closing_courtesy, review.loyalty_perk_awarded or ""]
+    )
+    assert "_" not in customer_facing
+
+
+def test_delighted_greeting_uses_the_tier_display_name(agent, profile_factory):
+    review = agent.audit_experience(profile_factory(WealthTier.ULTRA_HNW), DELIGHTED_QUERY, 0.9)
+    assert "Ultra-HNW" in review.empathetic_opening
 
 
 def test_agent_reports_its_identity(agent):

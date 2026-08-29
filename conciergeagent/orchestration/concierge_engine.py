@@ -77,9 +77,10 @@ class ConciergeEngine:
             )
         else:  # IntentCategory.LOYALTY -- handled entirely by the ExperienceAgent.
             sections.append(
-                "\n\n🎖️ **Loyalty & Recognition Review:** Your relationship standing has been "
-                f"reviewed by your dedicated {profile.wealth_tier.value.replace('_', ' ').title()} "
-                f"desk against a balance of {profile.loyalty_points:,} points."
+                "\n\n🎖️ **Loyalty & Recognition Review:** Your relationship "
+                "standing has been reviewed by your dedicated "
+                f"{profile.wealth_tier.display_name} desk against a balance of "
+                f"{profile.loyalty_points:,} points."
             )
 
         if review.loyalty_perk_awarded:

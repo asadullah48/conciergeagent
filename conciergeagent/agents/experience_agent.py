@@ -34,25 +34,34 @@ class ExperienceAgent:
 
     @staticmethod
     def _compose_opening(profile: CustomerProfile, grade: SentimentGrade) -> str:
-        tier_label = profile.wealth_tier.value.replace("_", " ").title()
+        """Greet in the register the sentiment calls for.
+
+        The neutral greeting names the dedicated officer from the SPEC tier
+        matrix rather than the tier itself: "valued Private Client client"
+        reads as a mistake, while "Your Senior Private Banker" is both
+        correct and warmer.
+        """
+        officer = PersonalizationEngine.get_tier_sla(profile.wealth_tier)["dedicated_officer"]
+        tier_label = profile.wealth_tier.display_name
+
         if grade is SentimentGrade.CRITICAL_DISTRESS:
             return (
                 f"Dear {profile.name}, please accept our immediate and sincere apologies. "
-                "A senior member of our team is taking personal ownership of your case right now."
+                f"Your {officer} is taking personal ownership of your case right now."
             )
         if grade is SentimentGrade.FRUSTRATED:
             return (
-                f"Dear {profile.name}, I am sorry this has fallen short of the standard you "
-                "expect from us. Let me put it right straight away."
+                f"Dear {profile.name}, I am sorry this has fallen short of the standard "
+                f"you expect from us. Your {officer} will put it right straight away."
             )
         if grade is SentimentGrade.DELIGHTED:
             return (
-                f"{profile.name}, thank you — it is a genuine privilege to look after you, "
+                f"{profile.name}, thank you. It is a genuine privilege to look after you, "
                 f"and our {tier_label} desk is delighted to hear this."
             )
         return (
-            f"A very warm welcome, {profile.name}. It is our absolute pleasure to assist our "
-            f"valued {tier_label} client today."
+            f"A very warm welcome, {profile.name}. Your {officer} is delighted to "
+            "assist you today."
         )
 
     def audit_experience(
@@ -63,9 +72,10 @@ class ExperienceAgent:
         escalate = grade in _ESCALATION_GRADES
 
         closing = (
-            "Your dedicated concierge team remains on standby, 24/7/365."
-            if not escalate
-            else "Your executive handover ticket is open and you will hear from us within your SLA."
+            "Your executive handover ticket is open and you will hear from us "
+            "within your SLA."
+            if escalate
+            else "Your dedicated concierge team remains on standby, 24/7/365."
         )
 
         return ExperienceReview(

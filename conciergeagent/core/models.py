@@ -20,6 +20,24 @@ class WealthTier(str, Enum):
     PRIVATE_CLIENT = "PRIVATE_CLIENT"
     ULTRA_HNW = "ULTRA_HNW"
 
+    @property
+    def display_name(self) -> str:
+        """Human-facing label.
+
+        A naive ``value.replace("_", " ").title()`` renders ULTRA_HNW as
+        "Ultra Hnw", which reads as a typo to the very clients this tier
+        describes. Customer-facing copy gets an explicit table.
+        """
+        return _TIER_DISPLAY_NAMES[self]
+
+
+_TIER_DISPLAY_NAMES = {
+    WealthTier.RETAIL: "Retail",
+    WealthTier.PREMIER: "Premier",
+    WealthTier.PRIVATE_CLIENT: "Private Client",
+    WealthTier.ULTRA_HNW: "Ultra-HNW",
+}
+
 
 class ServiceDomain(str, Enum):
     BANKING = "BANKING"

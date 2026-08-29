@@ -2,7 +2,7 @@
 ConciergeAgent: Hyperpersonalized Service AI Platform
 """
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 from conciergeagent.agents.advisor_agent import AdvisorAgent
 from conciergeagent.agents.experience_agent import ExperienceAgent
