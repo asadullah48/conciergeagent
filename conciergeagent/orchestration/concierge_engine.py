@@ -15,6 +15,8 @@ from conciergeagent.core.models import (
     ServiceInteraction,
 )
 from conciergeagent.core.observability import METRICS
+from conciergeagent.llm.client import LLMClient
+from conciergeagent.llm.narrator import narrate
 
 logger = logging.getLogger(__name__)
 
@@ -33,10 +35,13 @@ class ConciergeEngine:
     API consumers and effectively untestable.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, llm_client: LLMClient | None = None) -> None:
         self.advisor_agent = AdvisorAgent()
         self.support_agent = SupportAgent()
         self.experience_agent = ExperienceAgent()
+        # Optional. When absent the platform is fully deterministic, which is
+        # the default and the mode the public demo runs in.
+        self.llm_client = llm_client
 
     @staticmethod
     def _predict_csat(review: ExperienceReview) -> float:
@@ -89,6 +94,14 @@ class ConciergeEngine:
             )
         sections.append(f"\n\n{review.closing_courtesy}")
 
+        deterministic_text = "".join(sections)
+        narration = narrate(
+            deterministic_text,
+            profile.wealth_tier.display_name,
+            self.llm_client,
+            language=interaction.response_language,
+        )
+
         elapsed_ms = round((time.perf_counter() - started) * 1000.0, 2)
         METRICS.increment(
             "concierge_interactions_total",
@@ -109,6 +122,7 @@ class ConciergeEngine:
                 "intent": intent.value,
                 "sentiment_grade": review.sentiment_grade.value,
                 "escalated": review.executive_escalation_required,
+                "narration_mode": narration.mode.value,
                 "duration_ms": elapsed_ms,
             },
         )
@@ -119,7 +133,8 @@ class ConciergeEngine:
             customer_name=profile.name,
             wealth_tier=profile.wealth_tier,
             intent_routed=intent,
-            concierge_response_text="".join(sections),
+            concierge_response_text=narration.text,
+            narration_mode=narration.mode,
             advisory_recommendation=advisory,
             support_resolution=resolution,
             experience_review=review,

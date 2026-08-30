@@ -3,7 +3,7 @@
 > A tier-aware, multi-agent customer service platform for banking, private wealth, insurance, and luxury retail — routing every interaction through a sentiment audit, then to a specialist advisory, support, or loyalty lane.
 
 [![CI](https://github.com/asadullah48/conciergeagent/actions/workflows/ci.yml/badge.svg)](https://github.com/asadullah48/conciergeagent/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/tests-415%20passing-brightgreen.svg)](https://github.com/asadullah48/conciergeagent/actions/workflows/ci.yml)
+[![Tests](https://img.shields.io/badge/tests-462%20passing-brightgreen.svg)](https://github.com/asadullah48/conciergeagent/actions/workflows/ci.yml)
 [![Coverage](https://img.shields.io/badge/coverage-99%25-brightgreen.svg)](https://github.com/asadullah48/conciergeagent/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://www.python.org/)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
@@ -19,7 +19,7 @@
 git clone https://github.com/asadullah48/conciergeagent.git
 cd conciergeagent
 pip install -e ".[dev]"
-pytest tests -q                                                  # 415 passing
+pytest tests -q                                                  # 462 passing
 uvicorn conciergeagent.server:app --port 8005 --reload
 ```
 
@@ -62,6 +62,7 @@ curl -X POST http://127.0.0.1:8005/api/v1/concierge/interact \
     }
   },
   "experience_review": { "sentiment_grade": "NEUTRAL", "hospitality_rating": 5 },
+  "narration_mode": "DETERMINISTIC",     // "LLM_NARRATED" once LLM_API_KEY is set
   "csat_predicted_score": 4.95,
   "execution_time_ms": 0.31
 }
@@ -137,7 +138,32 @@ The dashboard ships English and Arabic with full RTL layout and no build step �
 
 ![Arabic RTL dashboard](docs/screenshots/dashboard-ar.jpg)
 
-> **Known limitation:** the interface chrome is localised, but agent responses are generated in English only. Localising the generated copy is tracked as future work.
+> **Known limitation:** without AI narration active, agent responses render in English only — the dashboard chrome is fully localised regardless. Set `response_language: "ar"` alongside `LLM_API_KEY` (below) to have the generated reply itself produced in Arabic too.
+
+---
+
+## Optional AI narration (free-tier)
+
+Every reply above is produced entirely by the deterministic rule engine — the tier SLA, the credit amount, the ticket reference, the allocation weights are all computed before a single word of prose exists. Set `LLM_API_KEY` and a model then *restates* that same, already-decided reply in warmer, more natural language. Leave it unset and nothing changes — that's the default, and what the test suite and this README's examples assume throughout.
+
+```bash
+# Any OpenAI-compatible /chat/completions endpoint works. Groq's free tier
+# (console.groq.com/keys) needs no card and is fast enough for a 30-second
+# concierge SLA, so it's the default - but nothing here is Groq-specific.
+export LLM_API_KEY=gsk_...
+export LLM_MODEL=llama-3.3-70b-versatile
+```
+
+Prefer to run fully local instead of a hosted free tier? Point the same client at Ollama — no code changes, just different environment variables:
+
+```bash
+ollama pull llama3.1
+export LLM_BASE_URL=http://localhost:11434/v1
+export LLM_MODEL=llama3.1
+export LLM_API_KEY=ollama   # Ollama ignores the value; the client just requires one
+```
+
+**The model is a renderer, never a decision-maker.** Every currency amount, percentage, ticket reference, and SLA guarantee in the deterministic reply is extracted with regex and checked against the model's output before it ships; if a single value was dropped, rounded, or invented, the narration is discarded and the deterministic reply is served instead. A model cannot quietly turn `$50,000.00` into `$500,000.00` and have it reach a client. The response's `narration_mode` field always reports which path ran (`LLM_NARRATED`, `LLM_FALLBACK_UNAVAILABLE`, `LLM_FALLBACK_UNFAITHFUL`, or `DETERMINISTIC`), the dashboard surfaces it next to the reply, and a fallback is always visible — never silent. See `conciergeagent/llm/` and its guardrail tests in [`tests/test_narrator.py`](tests/test_narrator.py) and [`tests/test_llm_client.py`](tests/test_llm_client.py).
 
 ---
 
@@ -158,7 +184,7 @@ The dashboard ships English and Arabic with full RTL layout and no build step �
 
 | Check | Status |
 | :--- | :--- |
-| Tests | 415, all passing |
+| Tests | 462, all passing |
 | Statement coverage | 99% (CI floor: 90%) |
 | Lint | `ruff` clean, zero suppressions |
 | Python versions | 3.10, 3.11, 3.12, 3.13 in CI |

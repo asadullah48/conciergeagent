@@ -460,6 +460,25 @@ body {
   white-space: pre-wrap;
 }
 
+.narration-note {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.narration-note::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.narration-note.narration-ai { color: var(--accent-emerald); }
+.narration-note.narration-fallback { color: var(--accent-gold); }
+
 .vip-perk-card {
   display: flex;
   align-items: center;

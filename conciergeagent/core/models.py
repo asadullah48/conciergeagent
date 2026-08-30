@@ -8,6 +8,7 @@ constraint and description into the OpenAPI schema at /docs.
 from __future__ import annotations
 
 from enum import Enum
+from typing import Literal
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -65,6 +66,15 @@ class IntentCategory(str, Enum):
     LOYALTY = "LOYALTY"
 
 
+class NarrationMode(str, Enum):
+    """How the customer-facing text was produced for this interaction."""
+
+    DETERMINISTIC = "DETERMINISTIC"
+    LLM_NARRATED = "LLM_NARRATED"
+    LLM_FALLBACK_UNAVAILABLE = "LLM_FALLBACK_UNAVAILABLE"
+    LLM_FALLBACK_UNFAITHFUL = "LLM_FALLBACK_UNFAITHFUL"
+
+
 class ResolutionStatus(str, Enum):
     RESOLVED = "RESOLVED"
     CLAIM_EXPEDITED = "CLAIM_EXPEDITED"
@@ -96,6 +106,9 @@ class ServiceInteraction(BaseModel):
         ge=-1.0,
         le=1.0,
         description="Upstream sentiment signal; -1.0 (hostile) to 1.0 (delighted).",
+    )
+    response_language: Literal["en", "ar"] = Field(
+        default="en", description="Language for the generated reply when narration is active."
     )
 
 
@@ -148,5 +161,9 @@ class ConciergeSessionResponse(BaseModel):
     advisory_recommendation: AdvisoryRecommendation | None = None
     support_resolution: SupportResolution | None = None
     experience_review: ExperienceReview
+    narration_mode: NarrationMode = Field(
+        default=NarrationMode.DETERMINISTIC,
+        description="Whether the reply was rendered by a model, and if not, why.",
+    )
     csat_predicted_score: float = Field(..., ge=0.0, le=5.0)
     execution_time_ms: float = Field(..., ge=0.0)

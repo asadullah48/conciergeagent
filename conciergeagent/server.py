@@ -15,11 +15,16 @@ from conciergeagent import __version__
 from conciergeagent.core.config import get_settings
 from conciergeagent.core.models import ConciergeSessionResponse, ServiceInteraction
 from conciergeagent.core.observability import METRICS, configure_logging
+from conciergeagent.llm.client import LLMClient
 from conciergeagent.orchestration.concierge_engine import ConciergeEngine
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
-engine = ConciergeEngine()
+
+# Narration is opt-in and credential-gated. Without LLM_API_KEY the gateway is
+# fully deterministic, so a public demo costs nothing and cannot fail on a
+# third-party outage.
+engine = ConciergeEngine(LLMClient(settings) if settings.llm_active else None)
 
 STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
 
@@ -33,6 +38,7 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
             "version": __version__,
             "environment": settings.environment,
             "allowed_origins": settings.allowed_origins,
+            "narration": settings.llm_model if settings.llm_active else "deterministic",
         },
     )
     yield
@@ -103,6 +109,8 @@ def readyz() -> dict:
             engine.support_agent.name,
             engine.experience_agent.name,
         ],
+        "narration_mode": "llm" if engine.llm_client else "deterministic",
+        "narration_model": engine.llm_client.model if engine.llm_client else None,
     }
 
 

@@ -4,6 +4,36 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0]
+
+### Added
+
+- **Optional LLM narration.** The concierge reply is still computed entirely
+  by the deterministic rule engine; a model may now *restate* it in natural
+  language before it reaches the customer (`conciergeagent/llm/`). Off by
+  default - it only activates when `LLM_API_KEY` is set - and targets any
+  OpenAI-compatible `/chat/completions` endpoint (Groq's free tier by
+  default; Cerebras, OpenRouter, Together, or a local Ollama server all work
+  by changing `LLM_BASE_URL`).
+- **Faithfulness guardrail.** Every currency amount, percentage, ticket
+  reference, and SLA guarantee in the deterministic reply is extracted and
+  checked against the model's output; if any value was dropped, rounded, or
+  altered, the narration is discarded and the deterministic reply is served
+  instead. A model cannot turn `$50,000.00` into `$500,000.00` and have it
+  reach a client.
+- `narration_mode` on the response, reporting which path produced the reply:
+  `DETERMINISTIC`, `LLM_NARRATED`, `LLM_FALLBACK_UNAVAILABLE`, or
+  `LLM_FALLBACK_UNFAITHFUL` - a fallback is always visible, never silent.
+- `response_language` request field (`en` / `ar`); narration honours it,
+  letting the generated reply itself be produced in Arabic, not only the
+  dashboard chrome around it.
+- Dashboard now shows which path produced the on-screen reply (AI-narrated
+  vs. deterministic, and why) next to the response.
+
+### Changed
+
+- Test suite expanded to 462 tests.
+
 ## [1.1.0]
 
 ### Fixed

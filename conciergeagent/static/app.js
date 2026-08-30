@@ -236,6 +236,30 @@ function renderConciergeMarkdown(text) {
     .concat('</p>');
 }
 
+// Surface how the reply text was produced. The gateway always renders the
+// deterministic, rule-computed reply first and only swaps in a model's
+// restatement of it after checking every number and reference survived --
+// so this note is either "AI-narrated" or an honest explanation of why not,
+// never a silent guess about what happened.
+const NARRATION_LABELS = {
+  LLM_NARRATED: { text: '✨ AI-narrated (facts verified against the deterministic reply)', cls: 'narration-ai' },
+  LLM_FALLBACK_UNAVAILABLE: { text: '⚙️ Deterministic reply (model unavailable)', cls: 'narration-fallback' },
+  LLM_FALLBACK_UNFAITHFUL: { text: '⚙️ Deterministic reply (model output failed fact-check)', cls: 'narration-fallback' },
+  DETERMINISTIC: null // no narration attempted; nothing to call out
+};
+
+function renderNarrationNote(mode) {
+  const note = document.getElementById('narrationNote');
+  const label = NARRATION_LABELS[mode];
+  if (!label) {
+    note.style.display = 'none';
+    return;
+  }
+  note.textContent = label.text;
+  note.className = `narration-note ${label.cls}`;
+  note.style.display = 'flex';
+}
+
 // Turn a FastAPI validation payload into a sentence a person can act on.
 function describeApiError(status, payload) {
   const detail = payload && payload.detail;
@@ -279,12 +303,14 @@ async function runConcierge() {
         renderConciergeMarkdown(describeApiError(res.status, data));
       document.getElementById('vipPerkCard').style.display = 'none';
       document.getElementById('allocationCard').style.display = 'none';
+      renderNarrationNote(null);
       return;
     }
 
     // Render dialog
     document.getElementById('conciergeResponseText').innerHTML =
       renderConciergeMarkdown(data.concierge_response_text);
+    renderNarrationNote(data.narration_mode);
 
     // Render badge
     const badge = document.getElementById('sentimentBadge');

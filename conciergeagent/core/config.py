@@ -10,6 +10,12 @@ from dataclasses import dataclass, field
 
 _TRUTHY = {"1", "true", "yes", "on"}
 
+# Any OpenAI-compatible /chat/completions endpoint works here. Groq, Cerebras,
+# OpenRouter and the Gemini compatibility endpoint all expose one, and all have
+# a free tier - which is why no provider is hard-coded.
+DEFAULT_LLM_BASE_URL = "https://api.groq.com/openai/v1"
+DEFAULT_LLM_MODEL = "llama-3.3-70b-versatile"
+
 DEFAULT_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8005",
     "http://localhost:8005",
@@ -33,6 +39,18 @@ def _env_list(name: str, default: list[str]) -> list[str]:
     return parsed or list(default)
 
 
+def _env_float(name: str, default: float, *, minimum: float, maximum: float) -> float:
+    """Parse a float env var, clamping to a sane range and ignoring garbage."""
+    raw = os.getenv(name)
+    if raw is None:
+        return default
+    try:
+        value = float(raw)
+    except ValueError:
+        return default
+    return max(minimum, min(maximum, value))
+
+
 @dataclass(frozen=True)
 class Settings:
     """Immutable snapshot of process configuration."""
@@ -45,9 +63,27 @@ class Settings:
     )
     metrics_enabled: bool = field(default_factory=lambda: _env_bool("METRICS_ENABLED", True))
 
+    # --- Optional LLM narration -------------------------------------------
+    # Absent an API key the platform runs fully deterministically, so the
+    # public demo never breaks and never bills anyone.
+    llm_api_key: str = field(default_factory=lambda: os.getenv("LLM_API_KEY", "").strip())
+    llm_base_url: str = field(
+        default_factory=lambda: os.getenv("LLM_BASE_URL", DEFAULT_LLM_BASE_URL).rstrip("/")
+    )
+    llm_model: str = field(default_factory=lambda: os.getenv("LLM_MODEL", DEFAULT_LLM_MODEL))
+    llm_timeout_seconds: float = field(
+        default_factory=lambda: _env_float("LLM_TIMEOUT_SECONDS", 8.0, minimum=0.5, maximum=60.0)
+    )
+    llm_enabled: bool = field(default_factory=lambda: _env_bool("LLM_ENABLED", True))
+
     @property
     def is_production(self) -> bool:
         return self.environment.lower() in {"production", "prod"}
+
+    @property
+    def llm_active(self) -> bool:
+        """Narration runs only when it is switched on and has a credential."""
+        return self.llm_enabled and bool(self.llm_api_key)
 
 
 def get_settings() -> Settings:

@@ -3,7 +3,7 @@
 > منصة خدمة عملاء متعددة الوكلاء تراعي شريحة ثروة العميل، مخصصة للقطاع المصرفي وإدارة الثروات والتأمين والتجزئة الفاخرة. تمر كل محادثة أولاً بتدقيق للمشاعر، ثم توجَّه إلى مسار متخصص واحد: الاستشارات، أو الدعم، أو الولاء.
 
 [![CI](https://github.com/asadullah48/conciergeagent/actions/workflows/ci.yml/badge.svg)](https://github.com/asadullah48/conciergeagent/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/tests-415%20passing-brightgreen.svg)](https://github.com/asadullah48/conciergeagent/actions/workflows/ci.yml)
+[![Tests](https://img.shields.io/badge/tests-462%20passing-brightgreen.svg)](https://github.com/asadullah48/conciergeagent/actions/workflows/ci.yml)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
 > النسخة الإنجليزية الكاملة: [README.md](README.md)
@@ -52,7 +52,7 @@ uvicorn conciergeagent.server:app --port 8005 --reload
 
 | المعيار | الحالة |
 | :--- | :--- |
-| الاختبارات | 415 اختباراً، جميعها ناجحة |
+| الاختبارات | 462 اختباراً، جميعها ناجحة |
 | تغطية الشيفرة | 99% (الحد الأدنى في CI: 90%) |
 | التدقيق البرمجي | `ruff` نظيف بالكامل |
 | إصدارات بايثون | 3.10 و 3.11 و 3.12 و 3.13 |
@@ -62,7 +62,7 @@ uvicorn conciergeagent.server:app --port 8005 --reload
 
 ## ملاحظة على الترجمة
 
-واجهة الاستخدام مترجمة بالكامل إلى العربية، إلا أن الردود التي تولّدها الوكلاء تصدر بالإنجليزية فقط في الوقت الحالي. توطين نص الردود مدرج ضمن الأعمال المستقبلية.
+واجهة الاستخدام مترجمة بالكامل إلى العربية. ردود الوكلاء نفسها تصدر بالإنجليزية افتراضياً، ولكن عند تفعيل ميزة السرد بالذكاء الاصطناعي الاختيارية (`LLM_API_KEY`) وتحديد `response_language: "ar"` في الطلب، يمكن توليد نص الرد نفسه بالعربية أيضاً. انظر قسم "Optional AI narration" في [README.md](README.md) للتفاصيل.
 
 ---
 
