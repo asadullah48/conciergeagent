@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # ---- Build stage: produce a wheel from pyproject, without dev extras ----
-FROM python:3.12-slim AS builder
+FROM python:3.14-slim AS builder
 
 WORKDIR /build
 ENV PIP_NO_CACHE_DIR=1 \
@@ -14,7 +14,7 @@ RUN python -m pip install --upgrade pip build \
 
 
 # ---- Runtime stage: install only the wheel and its runtime dependencies ----
-FROM python:3.12-slim AS runtime
+FROM python:3.14-slim AS runtime
 
 LABEL org.opencontainers.image.title="ConciergeAgent" \
       org.opencontainers.image.description="Hyperpersonalized customer service and financial concierge multi-agent platform" \
