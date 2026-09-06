@@ -239,3 +239,9 @@ Built by **Asadullah Shafique** — [DevUnity portfolio](https://asadullahshafiq
 Related projects: [ContextX](https://github.com/asadullah48/contextx) · [GuardrailAI](https://github.com/asadullah48/guardrailai) · [MarketAgentHub](https://github.com/asadullah48/marketagenthub) · [WorkforceAI](https://github.com/asadullah48/workforceai) · [DomainX](https://github.com/asadullah48/domainx)
 
 Licensed under [Apache 2.0](LICENSE).
+---
+
+## Author
+
+Built by **Asadullah Shafique** — [portfolio](https://asadullahshafique-devunity.vercel.app) · [GitHub](https://github.com/asadullah48)
+
